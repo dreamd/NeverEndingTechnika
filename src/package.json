@@ -1,0 +1,33 @@
+{
+  "name": "NeverEndingTechnika",
+  "version": "0.0.0",
+  "description": "download node js and isntall http://nodejs.org/",
+  "main": "app/server.js",
+  "bin": "app/server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "pkg": {
+    "scripts": [
+      "app/**/*.js"
+    ],
+    "assets": [
+      "app/**/*.js",
+      "app/**/*.json",
+      "node_modules/**/*.html",
+      "node_modules/**/*.js"
+    ]
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "app-module-path": "^1.0.2",
+    "decimal.js": "^4.0.2",
+    "iconv": "^3.0.0",
+    "moment": "^2.9.0",
+    "mongodb": "^2.0.45",
+    "node-monkey": "^0.2.15",
+    "q": "^1.4.1"
+  }
+}
