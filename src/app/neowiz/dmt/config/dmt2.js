@@ -5,6 +5,7 @@ module.exports = {
     '00': 'handshakeReq',
     '01': 'handshakeReq',
     '02': 'handshakeRecv',
+    '03': 'unknownReq',
     '5c': 'gameCommon',
     '0a': 'serverAliveCheck',
     '07': 'gameAliveConfirm',

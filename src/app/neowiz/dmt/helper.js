@@ -212,6 +212,9 @@ module.exports = {
     };
     for (var i = 0; i < requestList.length; i++) {
       var type = socket.params.config.PACKAGE_TYPE_TO_TYPE[requestList[i].slice(0, 1).toString('hex')];
+      if (type.indexOf('Output') > -1) {
+        type = 'unknownReqInput';
+      }
       if (!resultList[type]) {
         resultList[type] = [];
       }

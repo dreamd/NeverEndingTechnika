@@ -33,7 +33,7 @@ module.exports = {
       } else if (!cardData['gameRef']['dmt'] || !cardData['gameRef']['dmt']['dmt' + version]) {
         var versionModel = DMThelper.playerModel(version);
         var profile = versionModel.default();
-        fs.writeFileSync(Storage.globalPath + '/card/' + cardId + '/dmt' + version + '.json', JSON.stringify(profile));
+        module.exports.updatePlayerByCardId(cardId, version, profile);
         module.exports.registCardGameReference(cardId, arcadeId, cardData['gameRef']['dmt'].playerId, version);
       }
       return cardData['gameRef']['dmt'].playerId;
@@ -84,12 +84,8 @@ module.exports = {
   newPlayer: function (cardId, version) {
     var playerData = DMTplayerModel.new(cardId);
     var versionModel = DMThelper.playerModel(version);
-    var cardFolder = Storage.globalPath + '/card/' + cardId + '/';
     var profile = versionModel.default();
-    if (!fs.existsSync(cardFolder)){
-        fs.mkdirSync(cardFolder);
-    }
-    fs.writeFileSync(cardFolder + 'dmt' + version + '.json', JSON.stringify(profile));
+    module.exports.updatePlayerByCardId(cardId, version, profile);
     return DMTplayerAdapter.new(playerData);
   },
   showPlayerData: function (playerData, version) {
@@ -107,6 +103,7 @@ module.exports = {
       version: version,
       playerObjectId: playerData._id,
       dmtData: profileData,
+      cardId: playerData.cardId,
       playerId: playerData.playerId,
       isDisable: !!playerData.isDisabled
     };
@@ -208,7 +205,11 @@ module.exports = {
       DMTmusicAdapter.updateById(musicScore.musicId, updateData);
     });
   },
-  updatePlayerByPlayerObjectId: function (playerId, updateData) {
-    return DMTplayerAdapter.updateByObjectId(playerId, updateData);
+  updatePlayerByCardId: function (cardId, version, updateData) {
+    var cardFolder = Storage.globalPath + '/card/' + cardId + '/';
+    if (!fs.existsSync(cardFolder)){
+        fs.mkdirSync(cardFolder);
+    }
+    fs.writeFileSync(cardFolder + 'dmt' + version + '.json', JSON.stringify(updateData));
   }
 };

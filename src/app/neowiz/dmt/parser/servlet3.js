@@ -3,6 +3,12 @@
 var Common = require('core/common.js');
 
 module.exports = {
+  unknownReqInput: function (request) {
+    return {
+      type: 'unknownReqInput',
+      data: {}
+    };
+  },
   handshakeReqInput: function (request) {
     return {
       type: 'handshakeReqInput',

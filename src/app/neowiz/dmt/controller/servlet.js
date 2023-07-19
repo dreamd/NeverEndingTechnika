@@ -8,6 +8,12 @@ var DMTadapter = require('neowiz/dmt/adapter.js');
 var Storage = require('core/storage.js');
 
 module.exports = {
+  unknownReq: function (socket, requestList) {
+    var parser = DMThelper.parser(socket.params.version);
+    var input = DMThelper.inputData(socket, parser, requestList);
+    var resultList = [];
+    return DMThelper.outputData(socket, parser, resultList);
+  },
   handshakeReq: function (socket, requestList) {
     var parser = DMThelper.parser(socket.params.version);
     var input = DMThelper.inputData(socket, parser, requestList);
@@ -451,6 +457,7 @@ module.exports = {
             unknown2: 0,
             icon: parseInt(playerData.dmtData.icon, 10),
             plate: parseInt(playerData.dmtData.plate, 10),
+            pattern: parseInt(playerData.dmtData.pattern, 10),
             addMessage: 1,
             noteSkin: parseInt(playerData.dmtData.noteSkin, 10),
             maxPoint: parseInt(playerData.dmtData.maxPoint, 10),
@@ -462,7 +469,7 @@ module.exports = {
             unknown5: 0,
             unknown6: 0,
             unknown7: 0,
-            crewRaceAddMaxPoint: 999999,
+            crewRaceAddMaxPoint: 0,
             maxBuff: parseInt(playerData.dmtData.maxBuff, 10),
             expBuff: parseInt(playerData.dmtData.expBuff, 10),
             gaugeBuff: parseInt(playerData.dmtData.gaugeBuff, 10),
@@ -490,7 +497,7 @@ module.exports = {
     var playerId = Common.ensurePlayerId(input.playResultInput[0].playerId);
     return DMTadapter.playerDataById(playerId, socket.params.version).then(function(player) {
       if (!input.playResultScoreInput) {
-        return;
+        return player;
       }
       var musicIndex = 0;
       var updateMusicData = function(result) {
@@ -529,19 +536,36 @@ module.exports = {
         });
       };
       if (input.playResultScoreInput[0].scoreList.length > 0) {
-        return updateMusicData(input.playResultScoreInput[0].scoreList[musicIndex]);
+        updateMusicData(input.playResultScoreInput[0].scoreList[musicIndex]);
       }
-    }).then(function() {
+      return player;
+    }).then(function(player) {
       if (!input.playResultCrewChallengeInput) {
-        return;
+        return player;
       }
       var missionScore = DMTadapter.newMissionScoreModel(input.playResultCrewChallengeInput[0], playerId, socket.params.version);
       if (missionScore.missionTypeName === 'Unknown') {
-        return;
+        return player;
       }
       DMTadapter.newMissionScore(missionScore).catch(function(error) {
         console.error(error, requestList);
       });
+      return player;
+    })
+    .then (function (player) {
+      if (!input.playResultMaxPointInput && !input.playResultExpInput) {
+        return;
+      }
+      player.dmtData.exp = parseInt(player.dmtData.exp, 10);
+      player.dmtData.maxPoint = parseInt(player.dmtData.maxPoint, 10);
+      
+      if (input.playResultExpInput) {
+        player.dmtData.exp = input.playResultExpInput[0].toExp;
+      }
+      if (input.playResultMaxPointInput) {
+        player.dmtData.maxPoint += input.playResultMaxPointInput[0].maxPoint;
+      }
+      DMTadapter.updatePlayerByCardId(player.cardId, socket.params.version, player.dmtData);
     }).then(function() {
       return DMThelper.outputData(socket, parser, resultList);
     });
